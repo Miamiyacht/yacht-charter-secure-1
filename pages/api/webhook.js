@@ -19,23 +19,41 @@ export default async function handler(req, res) {
     const rawBody = await buffer(req);
     event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
+    console.error("❌ Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (event.type === "checkout.session.completed") {
-    const { metadata } = event.data.object;
-    const charterId = metadata.charter_id;
+    const session = event.data.object;
+    const charterId = session.metadata?.charter_id;
 
-    const records = await base("Charters")
-      .select({ filterByFormula: `{Charter ID} = '${charterId}'` })
-      .firstPage();
+    console.log("✅ Webhook received for charter:", charterId);
 
-    if (records.length > 0) {
-      await base("Charters").update(records[0].id, {
-        Status: "PAID"
-      });
+    if (!charterId) {
+      console.error("❌ No charter_id in metadata.");
+      return res.status(400).json({ error: "Missing charter_id" });
+    }
+
+    try {
+      const records = await base("Charters")
+        .select({ filterByFormula: `{Charter ID} = '${charterId}'`, maxRecords: 1 })
+        .firstPage();
+
+      if (records.length > 0) {
+        await base("Charters").update(records[0].id, {
+          Status: "PAID"
+        });
+        console.log("✅ Airtable status updated to PAID");
+      } else {
+        console.warn("⚠️ No matching record found in Airtable for:", charterId);
+      }
+
+    } catch (airtableError) {
+      console.error("❌ Airtable update failed:", airtableError);
+      return res.status(500).json({ error: "Airtable update failed" });
     }
   }
 
   res.status(200).json({ received: true });
 }
+
