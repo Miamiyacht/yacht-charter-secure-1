@@ -1,30 +1,34 @@
 export default function ThankYouPage() {
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "#f4f4f4",
-      fontFamily: "'Futura PT', sans-serif",
-      color: "#5c656a",
-      padding: "2rem",
-      textAlign: "center"
-    }}>
-      <h1 style={{ fontSize: "2rem", fontWeight: 300, marginBottom: "0.5rem" }}>
-        Thank You
-      </h1>
-      <div style={{ fontSize: "2.5rem", marginBottom: "1.5rem" }}>✅</div>
-      <p style={{ fontSize: "1.1rem", fontWeight: 300, margin: "0.5rem 0" }}>
-        Your yacht charter payment has been received successfully.
-      </p>
-      <p style={{ fontSize: "1.1rem", fontWeight: 300, margin: "0.5rem 0" }}>
-        A confirmation email will be sent shortly.
-      </p>
-      <p style={{ fontSize: "1.1rem", fontWeight: 300, margin: "0.5rem 0" }}>
-        We look forward to welcoming you aboard!
-      </p>
-    </div>
+    <>
+      <style jsx>{`
+        body {
+          margin: 0;
+          font-family: 'Futura PT', sans-serif;
+          background-color: #f4f4f4;
+          font-weight: 300;
+        }
+        h1, h2, h3, p, span, div {
+          font-weight: 300;
+        }
+        .container {
+          max-width: 500px;
+          margin: 4rem auto;
+          background: white;
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+          color: #5c656a;
+          text-align: center;
+        }
+      `}</style>
+      <div className="container">
+        <h1>THANK YOU</h1>
+        <div style={{ fontSize: "2.5rem", marginBottom: "1.5rem" }}>✅</div>
+        <p>Your yacht charter payment has been received successfully.</p>
+        <p>A confirmation email will be sent shortly.</p>
+        <p>We look forward to welcoming you aboard!</p>
+      </div>
+    </>
   );
 }
