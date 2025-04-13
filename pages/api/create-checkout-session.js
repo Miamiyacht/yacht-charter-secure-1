@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   console.log("🧾 Creating checkout session with metadata:", {
     charter_id: charterId,
-    email: email
+    email: email,
   });
 
   try {
