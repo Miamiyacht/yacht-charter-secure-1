@@ -1,4 +1,3 @@
-
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
@@ -17,7 +16,10 @@ export default async function handler(req, res) {
         },
         quantity: 1,
       }],
-      metadata: { charter_id: charterId, email },
+      metadata: {
+        charter_id: charterId,
+        email: email,
+      },
       success_url: `${process.env.DOMAIN}/thank-you`,
       cancel_url: `${process.env.DOMAIN}/payment-cancelled`,
     });
