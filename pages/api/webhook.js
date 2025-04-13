@@ -27,10 +27,10 @@ export default async function handler(req, res) {
     const session = event.data.object;
     const charterId = session.metadata?.charter_id;
 
-    console.log("✅ Webhook received for charter:", charterId);
+    console.log("✅ Webhook received for charter_id:", charterId);
 
     if (!charterId) {
-      console.error("❌ No charter_id in metadata.");
+      console.error("❌ charter_id not found in metadata.");
       return res.status(400).json({ error: "Missing charter_id" });
     }
 
@@ -43,11 +43,10 @@ export default async function handler(req, res) {
         await base("Charters").update(records[0].id, {
           Status: "PAID"
         });
-        console.log("✅ Airtable status updated to PAID");
+        console.log("✅ Airtable updated to PAID for", charterId);
       } else {
-        console.warn("⚠️ No matching record found in Airtable for:", charterId);
+        console.warn("⚠️ No matching Airtable record for charter_id:", charterId);
       }
-
     } catch (airtableError) {
       console.error("❌ Airtable update failed:", airtableError);
       return res.status(500).json({ error: "Airtable update failed" });
@@ -56,4 +55,5 @@ export default async function handler(req, res) {
 
   res.status(200).json({ received: true });
 }
+
 
