@@ -7,9 +7,8 @@ export default function VerifyPlusPage() {
   const { charterId } = router.query;
 
   const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isVerified, setIsVerified] = useState(false);
+  const [identitySubmitted, setIdentitySubmitted] = useState(false);
 
   useEffect(() => {
     if (!charterId) return;
@@ -20,25 +19,24 @@ export default function VerifyPlusPage() {
         if (data.error) throw new Error(data.error);
         setBooking(data);
       })
-      .catch(() => setError("Booking not found."))
-      .finally(() => setLoading(false));
+      .catch(() => setError("Booking not found."));
   }, [charterId]);
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.get("verified") === "true") {
-      setIsVerified(true);
+      setIdentitySubmitted(true);
     }
   }, []);
 
-  const startVerification = async () => {
+  const handleVerify = async () => {
     const res = await fetch("/api/create-verify-plus-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: booking?.Email,
-        charter_id: booking?.["Charter ID"]
-      })
+        charterId: booking["Charter ID"],
+        email: booking.Email,
+      }),
     });
 
     const data = await res.json();
@@ -54,11 +52,11 @@ export default function VerifyPlusPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charter_id: booking["Charter ID"],
+        charterId: booking["Charter ID"],
         email: booking.Email,
         amount: booking["Price USD"],
-        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`
-      })
+        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
+      }),
     });
 
     const data = await res.json();
@@ -72,15 +70,12 @@ export default function VerifyPlusPage() {
   return (
     <>
       <Head>
-        <title>Verify Identity – Tier 3</title>
+        <title>Verify Identity - Secure Yacht Charter</title>
         <style>{`
           body {
-            font-family: 'Futura PT', sans-serif;
-            background: #f4f4f4;
-            font-weight: 300;
             margin: 0;
-          }
-          h1, h2, p, div {
+            font-family: 'Futura PT', sans-serif;
+            background-color: #f4f4f4;
             font-weight: 300;
           }
           .container {
@@ -103,17 +98,16 @@ export default function VerifyPlusPage() {
             margin-top: 1.5rem;
             cursor: pointer;
           }
-          .success {
-            color: green;
+          .status-line {
+            margin: 0.75rem 0;
             font-weight: bold;
+            color: green;
           }
         `}</style>
       </Head>
-
       <div className="container">
-        <h1>SECURE YOUR YACHT CHARTER</h1>
-        {loading && <p>Loading booking...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        <h1>VERIFY YOUR IDENTITY</h1>
+        {error && <p>{error}</p>}
         {booking && (
           <>
             <p><strong>Charter ID:</strong> {booking["Charter ID"]}</p>
@@ -122,16 +116,17 @@ export default function VerifyPlusPage() {
             <p><strong>Yacht:</strong> {booking.Yacht}</p>
             <p><strong>Total Price:</strong> ${(booking["Price USD"] / 100).toFixed(2)}</p>
 
-            {!isVerified ? (
+            {!identitySubmitted ? (
               <>
                 <p>Please verify your identity before proceeding to payment.</p>
-                <button className="button" onClick={startVerification}>
+                <button className="button" onClick={handleVerify}>
                   Start Identity Verification
                 </button>
               </>
             ) : (
               <>
-                <p className="success">Card Uploaded ✅</p>
+                <p className="status-line">Card Uploaded ✅</p>
+                <p className="status-line">Identity Submitted ✅</p>
                 <button className="button" onClick={handlePayment}>
                   Proceed to Payment
                 </button>
@@ -143,4 +138,3 @@ export default function VerifyPlusPage() {
     </>
   );
 }
-
