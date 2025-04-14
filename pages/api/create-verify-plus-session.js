@@ -15,7 +15,9 @@ export default async function handler(req, res) {
   try {
     const session = await stripe.identity.verificationSessions.create({
       type: "document",
-      selfie: true, // ✅ Correct way to enable selfie capture
+      options: {
+        selfie: true
+      },
       return_url: `${process.env.DOMAIN}/verify-plus/${charterId}?verified=true`,
       metadata: {
         charter_id: charterId,
