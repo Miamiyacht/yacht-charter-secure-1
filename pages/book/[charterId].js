@@ -53,9 +53,6 @@ export default function CharterBookingPage() {
             background-color: #f4f4f4;
             font-weight: 300;
           }
-          h1, h2, h3, p, span, div {
-            font-weight: 300;
-          }
           .container {
             max-width: 500px;
             margin: 4rem auto;
