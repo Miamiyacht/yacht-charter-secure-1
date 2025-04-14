@@ -1,4 +1,4 @@
-import Stripe from "stripe";
+import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
@@ -6,28 +6,27 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { charterId, email } = req.body;
+  const { email, charterId } = req.body;
 
-  if (!charterId || !email) {
-    return res.status(400).json({ error: "Missing charterId or email" });
+  if (!email || !charterId) {
+    return res.status(400).json({ error: "Missing email or charterId" });
   }
 
   try {
     const session = await stripe.identity.verificationSessions.create({
-      type: "document",
-      options: {
-        selfie: true // ✅ this is a true boolean (NOT a string)
-      },
-      return_url: `${process.env.DOMAIN}/verify-plus/${charterId}?verified=true`,
+      // ✅ Use your custom verification flow with selfie and ID check
+      verification_flow: "vf_1R9RZyIymPcb3lYVW8pf9qBq",
       metadata: {
         charter_id: charterId,
-        email
-      }
+        email: email
+      },
+      return_url: `${process.env.DOMAIN}/verify-plus/${charterId}?verified=true`
     });
 
-    res.status(200).json({ url: session.url });
+    return res.status(200).json({ url: session.url });
+
   } catch (error) {
     console.error("❌ Error creating Tier 3 identity session:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
