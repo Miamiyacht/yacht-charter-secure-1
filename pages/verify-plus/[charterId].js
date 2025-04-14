@@ -2,18 +2,16 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-export default function VerifyPlusPage() {
+export default function VerifyPlusBookingPage() {
   const router = useRouter();
   const { charterId } = router.query;
 
   const [booking, setBooking] = useState(null);
   const [status, setStatus] = useState("Loading...");
   const [error, setError] = useState(null);
-  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     if (!charterId) return;
-
     fetch(`/api/get-booking?charterId=${charterId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -24,20 +22,13 @@ export default function VerifyPlusPage() {
       .catch(() => setError("Booking not found."));
   }, [charterId]);
 
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    if (query.get("verified") === "true") {
-      setIsVerified(true);
-    }
-  }, []);
-
-  const handleVerify = async () => {
+  const handleVerification = async () => {
     const res = await fetch("/api/create-verify-plus-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charterId: booking["Charter ID"],
-        email: booking.Email
+        charter_id: booking["Charter ID"],
+        email: booking.Email,
       }),
     });
     const data = await res.json();
@@ -45,26 +36,6 @@ export default function VerifyPlusPage() {
       window.location.href = data.url;
     } else {
       alert("Failed to start identity verification.");
-    }
-  };
-
-  const handlePayment = async () => {
-    const res = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        charterId: booking["Charter ID"],
-        name: booking["Customer Name"],
-        email: booking.Email,
-        amount: booking["Price USD"],
-        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`
-      }),
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Failed to create payment session.");
     }
   };
 
@@ -79,6 +50,11 @@ export default function VerifyPlusPage() {
             background-color: #f4f4f4;
             font-weight: 300;
           }
+          h1 {
+            font-size: 1.25rem;
+            font-family: 'Futura PT', sans-serif;
+            font-weight: 300;
+          }
           .container {
             max-width: 500px;
             margin: 4rem auto;
@@ -89,40 +65,20 @@ export default function VerifyPlusPage() {
             color: #5c656a;
             text-align: center;
           }
-          .title {
-            font-size: 1.25rem;
-            font-family: 'Futura PT', sans-serif;
-            font-weight: 300;
-            margin-bottom: 1rem;
-            white-space: nowrap;
-          }
-          p {
-            margin: 0.5rem 0;
-            font-size: 1rem;
-          }
           .button {
-            background-color: #5c656a;
+            background: #5c656a;
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
+            border-radius: 6px;
+            padding: 0.75rem 2rem;
             font-size: 1rem;
-            font-weight: 400;
+            margin-top: 1.5rem;
             cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
-          }
-          .button:hover {
-            background-color: #474e52;
-          }
-          .paid {
-            color: green;
-            font-weight: bold;
           }
         `}</style>
       </Head>
       <div className="container">
-        <h1 className="title">SECURE YOUR YACHT CHARTER</h1>
+        <h1>SECURE YOUR YACHT CHARTER</h1>
         {error && <p>{error}</p>}
         {booking && (
           <>
@@ -131,26 +87,12 @@ export default function VerifyPlusPage() {
             <p><strong>Date:</strong> {booking.Date}</p>
             <p><strong>Yacht:</strong> {booking.Yacht}</p>
             <p><strong>Total Price:</strong> ${(booking["Price USD"] / 100).toFixed(2)}</p>
-            <p><strong>Status:</strong> <span className={status === "PAID" ? "paid" : ""}>{status}</span></p>
-
-            {!isVerified && (
-              <>
-                <p>Please verify your identity before proceeding to payment.</p>
-                <button className="button" onClick={handleVerify}>Start Identity Verification</button>
-              </>
-            )}
-
-            {isVerified && (
-              <>
-                <p>Card Uploaded ✅</p>
-                <p>Identity Submitted ✅</p>
-                <button className="button" onClick={handlePayment}>Proceed to Payment</button>
-              </>
-            )}
+            <p>Please verify your identity before proceeding to payment.</p>
+            <button className="button" onClick={handleVerification}>Start Identity Verification</button>
           </>
         )}
       </div>
     </>
   );
 }
-
+     
