@@ -38,20 +38,25 @@ export default function VerifyCharterPage() {
   }, []);
 
   const startVerification = async () => {
-    const res = await fetch("/api/create-identity-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        charterId: booking["Charter ID"],
-        email: booking.Email,
-      }),
-    });
+    try {
+      const res = await fetch("/api/create-identity-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          charterId: booking["Charter ID"],
+          email: booking.Email,
+        }),
+      });
 
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Failed to start identity verification.");
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Failed to start identity verification.");
+      }
+    } catch (error) {
+      console.error("Error starting verification:", error);
+      alert("An error occurred. Please try again.");
     }
   };
 
@@ -123,12 +128,15 @@ export default function VerifyCharterPage() {
             <p><strong>Total Price:</strong> ${(booking["Price USD"] / 100).toFixed(2)}</p>
 
             {!verified ? (
-              <button className="button" onClick={startVerification}>
-                Verify Identity
-              </button>
+              <>
+                <p>Please verify your identity before proceeding to payment.</p>
+                <button className="button" onClick={startVerification}>
+                  Start Identity Verification
+                </button>
+              </>
             ) : (
               <>
-                <p style={{ color: "green" }}>✅ Identity verified</p>
+                <p style={{ color: "green" }}>Card Uploaded ✅</p>
                 <button className="button" onClick={handlePayment}>
                   Proceed to Payment
                 </button>
@@ -140,3 +148,4 @@ export default function VerifyCharterPage() {
     </>
   );
 }
+
