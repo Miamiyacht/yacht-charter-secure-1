@@ -31,7 +31,7 @@ export default function CharterBookingPage() {
         name: booking["Customer Name"],
         email: booking.Email,
         amount: booking["Price USD"],
-        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
+        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`
       }),
     });
     const data = await res.json();
@@ -54,7 +54,6 @@ export default function CharterBookingPage() {
             font-weight: 300;
           }
           h1, h2, h3, p, span, div {
-            font-family: 'Futura PT', sans-serif;
             font-weight: 300;
           }
           .container {
@@ -69,6 +68,8 @@ export default function CharterBookingPage() {
           }
           .title {
             font-size: 1.25rem;
+            font-family: 'Futura PT', sans-serif;
+            font-weight: 300;
             margin-bottom: 1rem;
           }
           .button {
@@ -107,3 +108,4 @@ export default function CharterBookingPage() {
     </>
   );
 }
+
