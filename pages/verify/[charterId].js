@@ -127,7 +127,6 @@ export default function Tier2VerifyPage() {
 
             {step === 2 && (
               <>
-                <p className="verified">Card Uploaded ✅</p>
                 <button className="button" onClick={handlePayment}>
                   Proceed to Payment
                 </button>
