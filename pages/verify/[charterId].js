@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-export default function Tier2VerifyPage() {
+export default function VerifyPage() {
   const router = useRouter();
   const { charterId } = router.query;
 
@@ -17,23 +17,27 @@ export default function Tier2VerifyPage() {
       .then((data) => {
         if (data.error) throw new Error(data.error);
         setBooking(data);
-        const verified = new URLSearchParams(window.location.search).get("verified");
-        if (verified === "true") {
-          setStep(2);
-        }
       })
       .catch(() => setError("Booking not found."));
   }, [charterId]);
 
-  const handleVerify = async () => {
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (query.get("verified") === "true") {
+      setStep(2);
+    }
+  }, []);
+
+  const startVerification = async () => {
     const res = await fetch("/api/create-identity-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charter_id: booking["Charter ID"],
+        charterId: booking["Charter ID"],
         email: booking.Email,
       }),
     });
+
     const data = await res.json();
     if (data.url) {
       window.location.href = data.url;
@@ -47,12 +51,13 @@ export default function Tier2VerifyPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charter_id: booking["Charter ID"],
+        charterId: booking["Charter ID"],
         email: booking.Email,
         amount: booking["Price USD"],
         description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
       }),
     });
+
     const data = await res.json();
     if (data.url) {
       window.location.href = data.url;
@@ -72,6 +77,9 @@ export default function Tier2VerifyPage() {
             background-color: #f4f4f4;
             font-weight: 300;
           }
+          h1, h2, h3, p, span, div {
+            font-weight: 300;
+          }
           .container {
             max-width: 500px;
             margin: 4rem auto;
@@ -82,20 +90,14 @@ export default function Tier2VerifyPage() {
             color: #5c656a;
             text-align: center;
           }
-          h1 {
-            font-size: 1.25rem;
-            font-family: 'Futura PT', sans-serif;
-            font-weight: 300;
-            margin-bottom: 1.5rem;
-          }
           .button {
-            background-color: #5c656a;
+            background: #5c656a;
             color: white;
             border: none;
             border-radius: 6px;
             padding: 0.75rem 2rem;
             font-size: 1rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             cursor: pointer;
           }
           .verified {
@@ -103,10 +105,17 @@ export default function Tier2VerifyPage() {
             font-weight: bold;
             margin-top: 1rem;
           }
+          .title {
+            font-size: 1.25rem;
+            font-family: 'Futura PT', sans-serif;
+            font-weight: 300;
+            margin-bottom: 1rem;
+          }
         `}</style>
       </Head>
+
       <div className="container">
-        <h1>SECURE YOUR YACHT CHARTER</h1>
+        <h1 className="title">SECURE YOUR YACHT CHARTER</h1>
         {error && <p>{error}</p>}
         {booking && (
           <>
@@ -119,7 +128,7 @@ export default function Tier2VerifyPage() {
             {step === 1 && (
               <>
                 <p>Please verify your identity before proceeding to payment.</p>
-                <button className="button" onClick={handleVerify}>
+                <button className="button" onClick={startVerification}>
                   Start Identity Verification
                 </button>
               </>
@@ -128,7 +137,6 @@ export default function Tier2VerifyPage() {
             {step === 2 && (
               <>
                 <p className="verified">Card Uploaded ✅</p>
-                <p className="verified">Identity Submitted ✅</p>
                 <button className="button" onClick={handlePayment}>
                   Proceed to Payment
                 </button>
