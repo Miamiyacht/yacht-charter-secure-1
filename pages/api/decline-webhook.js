@@ -23,39 +23,40 @@ export default async function handler(req, res) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Only handle failure events
-  const eventType = event.type;
-  const object = event.data?.object || {};
-  const metadata = object.metadata || {};
-  const charterId = metadata.charter_id;
+  const { type, data } = event;
+  const object = data.object || {};
+  let charterId;
 
-  if (
-    eventType === "payment_intent.payment_failed" ||
-    eventType === "checkout.session.async_payment_failed"
-  ) {
-    if (!charterId) {
-      console.error("❌ No charter_id found in metadata.");
-      return res.status(400).json({ error: "Missing charter_id" });
+  // Read metadata correctly based on event type
+  if (type === "payment_intent.payment_failed") {
+    charterId = object.metadata?.charter_id;
+  } else if (type === "checkout.session.async_payment_failed") {
+    charterId = object.metadata?.charter_id;
+  }
+
+  if (!charterId) {
+    console.error("❌ No charter_id found in event metadata:", JSON.stringify(object));
+    return res.status(400).json({ error: "Missing charter_id" });
+  }
+
+  try {
+    const records = await base("Charters")
+      .select({ filterByFormula: `{Charter ID} = '${charterId}'`, maxRecords: 1 })
+      .firstPage();
+
+    if (records.length > 0) {
+      await base("Charters").update(records[0].id, {
+        Status: "DECLINED"
+      });
+      console.log(`❗ Payment failed – marked DECLINED for charter_id: ${charterId}`);
+    } else {
+      console.warn(`⚠️ No matching Airtable record for charter_id: ${charterId}`);
     }
-
-    try {
-      const records = await base("Charters")
-        .select({ filterByFormula: `{Charter ID} = '${charterId}'`, maxRecords: 1 })
-        .firstPage();
-
-      if (records.length > 0) {
-        await base("Charters").update(records[0].id, {
-          Status: "DECLINED"
-        });
-        console.log(`❗ Payment failed – marked DECLINED for charter_id: ${charterId}`);
-      } else {
-        console.warn(`⚠️ No matching Airtable record for charter_id: ${charterId}`);
-      }
-    } catch (err) {
-      console.error("❌ Airtable update failed:", err.message);
-      return res.status(500).json({ error: "Airtable update failed" });
-    }
+  } catch (err) {
+    console.error("❌ Airtable update failed:", err.message);
+    return res.status(500).json({ error: "Airtable update failed" });
   }
 
   return res.status(200).json({ received: true });
 }
+
