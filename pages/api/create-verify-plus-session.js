@@ -16,13 +16,13 @@ export default async function handler(req, res) {
     const session = await stripe.identity.verificationSessions.create({
       type: "document",
       options: {
-        selfie: true // ✅ CORRECT LOCATION
+        selfie: true // ✅ this is a true boolean (NOT a string)
       },
       return_url: `${process.env.DOMAIN}/verify-plus/${charterId}?verified=true`,
       metadata: {
         charter_id: charterId,
-        email,
-      },
+        email
+      }
     });
 
     res.status(200).json({ url: session.url });
