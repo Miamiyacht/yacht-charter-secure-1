@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-export default function VerifyBookingPage() {
+export default function Tier2VerifyPage() {
   const router = useRouter();
   const { charterId } = router.query;
 
   const [booking, setBooking] = useState(null);
-  const [status, setStatus] = useState("Loading...");
+  const [step, setStep] = useState(1);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -17,12 +17,15 @@ export default function VerifyBookingPage() {
       .then((data) => {
         if (data.error) throw new Error(data.error);
         setBooking(data);
-        setStatus(data.Status || "INCOMPLETE");
+        const verified = new URLSearchParams(window.location.search).get("verified");
+        if (verified === "true") {
+          setStep(2);
+        }
       })
       .catch(() => setError("Booking not found."));
   }, [charterId]);
 
-  const handleVerification = async () => {
+  const handleVerify = async () => {
     const res = await fetch("/api/create-identity-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -39,6 +42,25 @@ export default function VerifyBookingPage() {
     }
   };
 
+  const handlePayment = async () => {
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        charter_id: booking["Charter ID"],
+        email: booking.Email,
+        amount: booking["Price USD"],
+        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
+      }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Failed to create payment session.");
+    }
+  };
+
   return (
     <>
       <Head>
@@ -48,11 +70,6 @@ export default function VerifyBookingPage() {
             margin: 0;
             font-family: 'Futura PT', sans-serif;
             background-color: #f4f4f4;
-            font-weight: 300;
-          }
-          h1 {
-            font-size: 1.25rem;
-            font-family: 'Futura PT', sans-serif;
             font-weight: 300;
           }
           .container {
@@ -65,15 +82,26 @@ export default function VerifyBookingPage() {
             color: #5c656a;
             text-align: center;
           }
+          h1 {
+            font-size: 1.25rem;
+            font-family: 'Futura PT', sans-serif;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+          }
           .button {
-            background: #5c656a;
+            background-color: #5c656a;
             color: white;
             border: none;
             border-radius: 6px;
             padding: 0.75rem 2rem;
             font-size: 1rem;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             cursor: pointer;
+          }
+          .verified {
+            color: green;
+            font-weight: bold;
+            margin-top: 1rem;
           }
         `}</style>
       </Head>
@@ -87,11 +115,29 @@ export default function VerifyBookingPage() {
             <p><strong>Date:</strong> {booking.Date}</p>
             <p><strong>Yacht:</strong> {booking.Yacht}</p>
             <p><strong>Total Price:</strong> ${(booking["Price USD"] / 100).toFixed(2)}</p>
-            <p>Please verify your identity before proceeding to payment.</p>
-            <button className="button" onClick={handleVerification}>Start Identity Verification</button>
+
+            {step === 1 && (
+              <>
+                <p>Please verify your identity before proceeding to payment.</p>
+                <button className="button" onClick={handleVerify}>
+                  Start Identity Verification
+                </button>
+              </>
+            )}
+
+            {step === 2 && (
+              <>
+                <p className="verified">Card Uploaded ✅</p>
+                <p className="verified">Identity Submitted ✅</p>
+                <button className="button" onClick={handlePayment}>
+                  Proceed to Payment
+                </button>
+              </>
+            )}
           </>
         )}
       </div>
     </>
   );
 }
+
