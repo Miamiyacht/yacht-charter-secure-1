@@ -7,6 +7,7 @@ export default async function handler(req, res) {
   }
 
   const { charterId, email } = req.body;
+  console.log("📨 Received request:", { charterId, email });
 
   if (!charterId || !email) {
     console.error("❌ Missing charterId or email", { charterId, email });
@@ -14,13 +15,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Create or retrieve a Stripe Customer using the charter ID
     const customer = await stripe.customers.create({
       email,
       metadata: { charter_id: charterId }
     });
 
-    // 2. Create the identity verification session
     const session = await stripe.identity.verificationSessions.create({
       type: "document",
       return_url: `${process.env.DOMAIN}/verify/${charterId}?verified=true`,
@@ -31,7 +30,9 @@ export default async function handler(req, res) {
       customer: customer.id
     });
 
+    console.log("✅ Created verification session:", session.id);
     res.status(200).json({ url: session.url });
+
   } catch (error) {
     console.error("❌ Error creating identity session:", error);
     res.status(500).json({ error: "Internal server error" });
