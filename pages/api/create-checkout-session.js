@@ -6,22 +6,33 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { charterId, email, amount, description } = req.body;
+    const { charter_id, email, amount, description, name } = req.body;
 
-    if (!charterId || !email || !amount || !description) {
-      console.error("❌ Missing required fields", { charterId, email, amount, description });
-      return res.status(400).json({ error: "Missing required booking info" });
+    if (!charter_id || !email || !amount || !description) {
+      console.error("❌ Missing required fields", {
+        charter_id,
+        email,
+        amount,
+        description,
+      });
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const customer = await stripe.customers.create({
+      email,
+      name,
+      metadata: { charter_id },
+    });
+
     console.log("🧾 Creating checkout session with metadata:", {
-      charter_id: charterId,
-      email
+      charter_id,
+      email,
     });
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
       mode: "payment",
-      customer_email: email,
+      payment_method_types: ["card"],
+      customer: customer.id,
       line_items: [
         {
           price_data: {
@@ -35,14 +46,8 @@ export default async function handler(req, res) {
         },
       ],
       metadata: {
-        charter_id: charterId,
+        charter_id,
         email,
-      },
-      payment_intent_data: {
-        metadata: {
-          charter_id: charterId,
-          email,
-        },
       },
       success_url: `${process.env.DOMAIN}/thank-you`,
       cancel_url: `${process.env.DOMAIN}/payment-cancelled`,
