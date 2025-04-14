@@ -1,61 +1,48 @@
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { charter_id, email, amount, description } = req.body;
+
+  if (!charter_id || !email || !amount || !description) {
+    console.error('❌ Missing required fields', { charter_id, email, amount, description });
+    return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    const { charter_id, email, amount, description, name } = req.body;
-
-    if (!charter_id || !email || !amount || !description) {
-      console.error("❌ Missing required fields", {
-        charter_id,
-        email,
-        amount,
-        description,
-      });
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
     const customer = await stripe.customers.create({
       email,
-      name,
       metadata: { charter_id },
     });
 
-    console.log("🧾 Creating checkout session with metadata:", {
-      charter_id,
-      email,
-    });
-
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card"],
+      payment_method_types: ['card'],
+      mode: 'payment',
       customer: customer.id,
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: 'usd',
+            product_data: { name: description },
             unit_amount: amount,
-            product_data: {
-              name: description,
-            },
           },
           quantity: 1,
         },
       ],
-      metadata: {
-        charter_id,
-        email,
-      },
-      success_url: `${process.env.DOMAIN}/thank-you`,
-      cancel_url: `${process.env.DOMAIN}/payment-cancelled`,
+      success_url: `${process.env.BASE_URL}/thank-you`,
+      cancel_url: `${process.env.BASE_URL}/payment-cancelled`,
+      metadata: { charter_id, email },
+      customer_email: email,
+      customer_creation: 'always',
+      setup_future_usage: 'on_session',
     });
 
     res.status(200).json({ url: session.url });
-  } catch (error) {
-    console.error("🔥 Stripe Checkout error:", error);
-    res.status(500).json({ error: "Internal server error" });
+  } catch (err) {
+    console.error('❌ Stripe error:', err);
+    res.status(500).json({ error: 'Stripe session creation failed' });
   }
 }
