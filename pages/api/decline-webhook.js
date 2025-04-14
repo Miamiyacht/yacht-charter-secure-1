@@ -23,14 +23,16 @@ export default async function handler(req, res) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (
-    event.type === "payment_intent.payment_failed" ||
-    event.type === "checkout.session.async_payment_failed"
-  ) {
-    const dataObject = event.data.object;
-    const metadata = dataObject.metadata || {};
-    const charterId = metadata.charter_id;
+  // Only handle failure events
+  const eventType = event.type;
+  const object = event.data?.object || {};
+  const metadata = object.metadata || {};
+  const charterId = metadata.charter_id;
 
+  if (
+    eventType === "payment_intent.payment_failed" ||
+    eventType === "checkout.session.async_payment_failed"
+  ) {
     if (!charterId) {
       console.error("❌ No charter_id found in metadata.");
       return res.status(400).json({ error: "Missing charter_id" });
@@ -55,5 +57,5 @@ export default async function handler(req, res) {
     }
   }
 
-  res.status(200).json({ received: true });
+  return res.status(200).json({ received: true });
 }
