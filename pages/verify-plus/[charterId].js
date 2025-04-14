@@ -1,5 +1,5 @@
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
 import Head from "next/head";
 
 export default function VerifyPlusPage() {
@@ -9,54 +9,43 @@ export default function VerifyPlusPage() {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [verified, setVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     if (!charterId) return;
 
-    const fetchBooking = async () => {
-      try {
-        const res = await fetch(`/api/get-booking?charterId=${charterId}`);
-        const data = await res.json();
+    fetch(`/api/get-booking?charterId=${charterId}`)
+      .then((res) => res.json())
+      .then((data) => {
         if (data.error) throw new Error(data.error);
         setBooking(data);
-      } catch (err) {
-        setError("Booking not found.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooking();
+      })
+      .catch(() => setError("Booking not found."))
+      .finally(() => setLoading(false));
   }, [charterId]);
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.get("verified") === "true") {
-      setVerified(true);
+      setIsVerified(true);
     }
   }, []);
 
   const startVerification = async () => {
-    try {
-      const res = await fetch("/api/create-verify-plus-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          charterId: booking["Charter ID"],
-          email: booking.Email,
-        }),
-      });
+    const res = await fetch("/api/create-verify-plus-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: booking?.Email,
+        charter_id: booking?.["Charter ID"]
+      })
+    });
 
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Failed to start identity verification.");
-      }
-    } catch (error) {
-      console.error("Error starting verification:", error);
-      alert("An error occurred. Please try again.");
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Failed to start identity verification.");
     }
   };
 
@@ -65,11 +54,11 @@ export default function VerifyPlusPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charterId: booking["Charter ID"],
+        charter_id: booking["Charter ID"],
         email: booking.Email,
         amount: booking["Price USD"],
-        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
-      }),
+        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`
+      })
     });
 
     const data = await res.json();
@@ -83,15 +72,15 @@ export default function VerifyPlusPage() {
   return (
     <>
       <Head>
-        <title>Secure Your Yacht Charter</title>
+        <title>Verify Identity – Tier 3</title>
         <style>{`
           body {
-            margin: 0;
             font-family: 'Futura PT', sans-serif;
-            background-color: #f4f4f4;
+            background: #f4f4f4;
             font-weight: 300;
+            margin: 0;
           }
-          h1, h2, h3, p, span, div {
+          h1, h2, p, div {
             font-weight: 300;
           }
           .container {
@@ -114,11 +103,17 @@ export default function VerifyPlusPage() {
             margin-top: 1.5rem;
             cursor: pointer;
           }
+          .success {
+            color: green;
+            font-weight: bold;
+          }
         `}</style>
       </Head>
+
       <div className="container">
         <h1>SECURE YOUR YACHT CHARTER</h1>
-        {error && <p>{error}</p>}
+        {loading && <p>Loading booking...</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
         {booking && (
           <>
             <p><strong>Charter ID:</strong> {booking["Charter ID"]}</p>
@@ -127,7 +122,7 @@ export default function VerifyPlusPage() {
             <p><strong>Yacht:</strong> {booking.Yacht}</p>
             <p><strong>Total Price:</strong> ${(booking["Price USD"] / 100).toFixed(2)}</p>
 
-            {!verified ? (
+            {!isVerified ? (
               <>
                 <p>Please verify your identity before proceeding to payment.</p>
                 <button className="button" onClick={startVerification}>
@@ -136,7 +131,7 @@ export default function VerifyPlusPage() {
               </>
             ) : (
               <>
-                <p style={{ color: "green" }}>Card Uploaded ✅</p>
+                <p className="success">Card Uploaded ✅</p>
                 <button className="button" onClick={handlePayment}>
                   Proceed to Payment
                 </button>
@@ -148,3 +143,4 @@ export default function VerifyPlusPage() {
     </>
   );
 }
+
