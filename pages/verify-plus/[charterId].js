@@ -1,5 +1,3 @@
-// pages/verify-plus/[charterId].js
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -40,7 +38,7 @@ export default function VerifyPlusPage() {
     if (data.url) {
       window.location.href = data.url;
     } else {
-      alert("Failed to start verification.");
+      alert("Failed to start identity verification.");
     }
   };
 
@@ -85,7 +83,7 @@ export default function VerifyPlusPage() {
             text-align: center;
           }
           h1 {
-            font-size: 1.25rem;
+            font-size: 1rem;
             font-family: 'Futura PT', sans-serif;
             font-weight: 300;
             margin-bottom: 1.5rem;
