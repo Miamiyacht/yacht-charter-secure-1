@@ -16,12 +16,16 @@ export default async function handler(req, res) {
   try {
     const session = await stripe.identity.verificationSessions.create({
       type: "document",
+      options: {
+        document: {
+          require_matching_selfie: true
+        }
+      },
       metadata: {
         charter_id: charterId,
         email: email
       },
-      return_url: `${process.env.DOMAIN}/verify-plus/${charterId}?verified=true`,
-      flow: "vf_1R9RZyIymPcb3lYVW8pf9qBq" // Replace with your actual flow ID
+      return_url: `${process.env.DOMAIN}/verify-plus/${charterId}?verified=true`
     });
 
     res.status(200).json({ url: session.url });
