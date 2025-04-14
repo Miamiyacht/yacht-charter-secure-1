@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-export default function VerifyPage() {
+export default function Tier2VerifyPage() {
   const router = useRouter();
   const { charterId } = router.query;
 
@@ -17,27 +17,23 @@ export default function VerifyPage() {
       .then((data) => {
         if (data.error) throw new Error(data.error);
         setBooking(data);
+        const verified = new URLSearchParams(window.location.search).get("verified");
+        if (verified === "true") {
+          setStep(2);
+        }
       })
       .catch(() => setError("Booking not found."));
   }, [charterId]);
 
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    if (query.get("verified") === "true") {
-      setStep(2);
-    }
-  }, []);
-
-  const startVerification = async () => {
+  const handleVerify = async () => {
     const res = await fetch("/api/create-identity-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charterId: booking["Charter ID"],
+        charter_id: booking["Charter ID"],
         email: booking.Email,
       }),
     });
-
     const data = await res.json();
     if (data.url) {
       window.location.href = data.url;
@@ -51,13 +47,12 @@ export default function VerifyPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charterId: booking["Charter ID"],
+        charter_id: booking["Charter ID"],
         email: booking.Email,
         amount: booking["Price USD"],
         description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
       }),
     });
-
     const data = await res.json();
     if (data.url) {
       window.location.href = data.url;
@@ -77,9 +72,6 @@ export default function VerifyPage() {
             background-color: #f4f4f4;
             font-weight: 300;
           }
-          h1, h2, h3, p, span, div {
-            font-weight: 300;
-          }
           .container {
             max-width: 500px;
             margin: 4rem auto;
@@ -90,14 +82,20 @@ export default function VerifyPage() {
             color: #5c656a;
             text-align: center;
           }
+          h1 {
+            font-size: 1.25rem;
+            font-family: 'Futura PT', sans-serif;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+          }
           .button {
-            background: #5c656a;
+            background-color: #5c656a;
             color: white;
             border: none;
             border-radius: 6px;
             padding: 0.75rem 2rem;
             font-size: 1rem;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             cursor: pointer;
           }
           .verified {
@@ -105,17 +103,10 @@ export default function VerifyPage() {
             font-weight: bold;
             margin-top: 1rem;
           }
-          .title {
-            font-size: 1.25rem;
-            font-family: 'Futura PT', sans-serif;
-            font-weight: 300;
-            margin-bottom: 1rem;
-          }
         `}</style>
       </Head>
-
       <div className="container">
-        <h1 className="title">SECURE YOUR YACHT CHARTER</h1>
+        <h1>SECURE YOUR YACHT CHARTER</h1>
         {error && <p>{error}</p>}
         {booking && (
           <>
@@ -128,7 +119,7 @@ export default function VerifyPage() {
             {step === 1 && (
               <>
                 <p>Please verify your identity before proceeding to payment.</p>
-                <button className="button" onClick={startVerification}>
+                <button className="button" onClick={handleVerify}>
                   Start Identity Verification
                 </button>
               </>
@@ -148,4 +139,5 @@ export default function VerifyPage() {
     </>
   );
 }
+
 
