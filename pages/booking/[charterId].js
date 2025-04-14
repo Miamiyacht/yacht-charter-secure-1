@@ -12,6 +12,7 @@ export default function CharterBookingPage() {
 
   useEffect(() => {
     if (!charterId) return;
+
     fetch(`/api/get-booking?charterId=${charterId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -30,7 +31,8 @@ export default function CharterBookingPage() {
         charter_id: booking["Charter ID"],
         email: booking.Email,
         amount: booking["Price USD"],
-        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`
+        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
+        name: booking["Customer Name"]
       }),
     });
 
@@ -53,9 +55,6 @@ export default function CharterBookingPage() {
             background-color: #f4f4f4;
             font-weight: 300;
           }
-          h1, h2, h3, p, span, div {
-            font-weight: 300;
-          }
           .container {
             max-width: 500px;
             margin: 4rem auto;
@@ -66,19 +65,27 @@ export default function CharterBookingPage() {
             color: #5c656a;
             text-align: center;
           }
-          h1 {
+          .title {
             font-size: 1.25rem;
-            text-transform: uppercase;
+            font-family: 'Futura PT', sans-serif;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            white-space: nowrap;
           }
           .button {
-            background: #5c656a;
+            background-color: #5c656a;
             color: white;
             border: none;
-            border-radius: 6px;
-            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            padding: 12px 24px;
             font-size: 1rem;
-            margin-top: 1.5rem;
+            font-weight: 400;
             cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+          }
+          .button:hover {
+            background-color: #474e52;
           }
           .paid {
             color: green;
@@ -86,8 +93,9 @@ export default function CharterBookingPage() {
           }
         `}</style>
       </Head>
+
       <div className="container">
-        <h1>Secure Your Yacht Charter</h1>
+        <h1 className="title">SECURE YOUR YACHT CHARTER</h1>
         {error && <p>{error}</p>}
         {booking && (
           <>
@@ -97,8 +105,11 @@ export default function CharterBookingPage() {
             <p><strong>Yacht:</strong> {booking.Yacht}</p>
             <p><strong>Total Price:</strong> ${(booking["Price USD"] / 100).toFixed(2)}</p>
             <p><strong>Status:</strong> <span className={status === "PAID" ? "paid" : ""}>{status}</span></p>
+
             {status !== "PAID" && (
-              <button className="button" onClick={handlePayment}>Proceed to Payment</button>
+              <button className="button" onClick={handlePayment}>
+                Proceed to Payment
+              </button>
             )}
           </>
         )}
