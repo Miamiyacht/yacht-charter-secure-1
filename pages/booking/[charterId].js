@@ -27,11 +27,10 @@ export default function CharterBookingPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charterId: booking["Charter ID"],
-        name: booking["Customer Name"],
+        charter_id: booking["Charter ID"],
         email: booking.Email,
         amount: booking["Price USD"],
-        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`
+        description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
       }),
     });
     const data = await res.json();
@@ -53,8 +52,11 @@ export default function CharterBookingPage() {
             background-color: #f4f4f4;
             font-weight: 300;
           }
-          h1, h2, h3, p, span, div {
+          h1 {
+            font-size: 1.25rem;
+            font-family: 'Futura PT', sans-serif;
             font-weight: 300;
+            margin-bottom: 1.5rem;
           }
           .container {
             max-width: 500px;
@@ -80,10 +82,6 @@ export default function CharterBookingPage() {
             color: green;
             font-weight: bold;
           }
-          .declined {
-            color: red;
-            font-weight: bold;
-          }
         `}</style>
       </Head>
       <div className="container">
@@ -96,15 +94,7 @@ export default function CharterBookingPage() {
             <p><strong>Date:</strong> {booking.Date}</p>
             <p><strong>Yacht:</strong> {booking.Yacht}</p>
             <p><strong>Total Price:</strong> ${(booking["Price USD"] / 100).toFixed(2)}</p>
-            <p>
-              <strong>Status:</strong>{" "}
-              <span className={
-                status === "PAID" ? "paid" :
-                status === "DECLINED" ? "declined" : ""
-              }>
-                {status}
-              </span>
-            </p>
+            <p><strong>Status:</strong> <span className={status === "PAID" ? "paid" : ""}>{status}</span></p>
             {status !== "PAID" && (
               <button className="button" onClick={handlePayment}>Proceed to Payment</button>
             )}
@@ -114,4 +104,3 @@ export default function CharterBookingPage() {
     </>
   );
 }
-
