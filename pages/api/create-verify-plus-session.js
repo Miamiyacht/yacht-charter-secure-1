@@ -27,4 +27,3 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Failed to create Tier 3 identity session' });
   }
 }
-
