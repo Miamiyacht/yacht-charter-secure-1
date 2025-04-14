@@ -83,7 +83,7 @@ export default function Tier2VerifyPage() {
             text-align: center;
           }
           h1 {
-            font-size: 1.25rem;
+            font-size: 1rem;
             font-family: 'Futura PT', sans-serif;
             font-weight: 300;
             margin-bottom: 1.5rem;
@@ -139,4 +139,5 @@ export default function Tier2VerifyPage() {
     </>
   );
 }
+
 
