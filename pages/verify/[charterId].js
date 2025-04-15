@@ -91,7 +91,13 @@ export default function VerifyCharterPage() {
             background-color: #f4f4f4;
             font-weight: 300;
           }
-          h1, h2, h3, p, span, div {
+          h1 {
+            font-size: 1.25rem;
+            font-family: 'Futura PT', sans-serif;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+          }
+          p, span, div {
             font-weight: 300;
           }
           .container {
