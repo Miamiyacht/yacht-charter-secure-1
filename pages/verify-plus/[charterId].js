@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-export default function VerifyPlusPage() {
+export default function Tier3VerifyPlusPage() {
   const router = useRouter();
   const { charterId } = router.query;
 
@@ -47,7 +47,8 @@ export default function VerifyPlusPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        charter_id: booking["Charter ID"],
+        charterId: booking["Charter ID"],
+        name: booking["Customer Name"],
         email: booking.Email,
         amount: booking["Price USD"],
         description: `Yacht Charter: ${booking.Yacht} on ${booking.Date}`,
@@ -83,7 +84,7 @@ export default function VerifyPlusPage() {
             text-align: center;
           }
           h1 {
-            font-size: 1rem;
+            font-size: 1.25rem;
             font-family: 'Futura PT', sans-serif;
             font-weight: 300;
             margin-bottom: 1.5rem;
