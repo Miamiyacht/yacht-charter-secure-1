@@ -15,6 +15,7 @@ export default function ThankYouPage() {
           margin-bottom: 1.5rem;
         }
         p {
+          font-family: 'Futura PT', sans-serif;
           font-weight: 300;
         }
         .container {
