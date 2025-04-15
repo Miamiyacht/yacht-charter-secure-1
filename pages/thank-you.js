@@ -1,31 +1,42 @@
 export default function ThankYouPage() {
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "#f4f4f4",
-      fontFamily: "'Futura PT', sans-serif",
-      color: "#5c656a",
-      padding: "2rem",
-      textAlign: "center"
-    }}>
-      <div style={{
-        maxWidth: "500px",
-        background: "white",
-        padding: "2rem",
-        borderRadius: "12px",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-        width: "100%"
-      }}>
-        <h1 style={{ fontWeight: 300 }}>THANK YOU</h1>
+    <>
+      <style jsx>{`
+        body {
+          margin: 0;
+          font-family: 'Futura PT', sans-serif;
+          background-color: #f4f4f4;
+          font-weight: 300;
+        }
+        h1 {
+          font-size: 1.25rem;
+          font-family: 'Futura PT', sans-serif;
+          font-weight: 300;
+          margin-bottom: 1.5rem;
+        }
+        p {
+          font-weight: 300;
+        }
+        .container {
+          max-width: 500px;
+          margin: 4rem auto;
+          background: white;
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+          color: #5c656a;
+          text-align: center;
+        }
+      `}</style>
+
+      <div className="container">
+        <h1>THANK YOU</h1>
         <div style={{ fontSize: "2.5rem", marginBottom: "1.5rem" }}>✅</div>
-        <p style={{ fontWeight: 300 }}>Your yacht charter payment has been received successfully.</p>
-        <p style={{ fontWeight: 300 }}>A confirmation email will be sent shortly.</p>
-        <p style={{ fontWeight: 300 }}>We look forward to welcoming you aboard!</p>
+        <p>Your yacht charter payment has been received successfully.</p>
+        <p>A confirmation email will be sent shortly.</p>
+        <p>We look forward to welcoming you aboard!</p>
+        <p>You may now close this browser window.</p>
       </div>
-    </div>
+    </>
   );
 }
